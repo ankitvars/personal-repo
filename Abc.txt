@@ -1,0 +1,11 @@
+curl -X POST \
+  'https://graph.instagram.com/v21.0/me/messages' \
+  -H 'Authorization: Bearer IGAAHam5A1ZAiFBZAE0zWld5b3RZAUVkxeVN1VW16S1c2UWhMaWsxMlFxal9LM1RSazJ4R1lHQmNFMmFVWHkwczhWZAF9yU1J5djlBdTl3T21rWk81T3RzN1R4MXhGcnVGTXIyYWxKUTl1Q2ZASSmMzTVZAsMGhnVnI2VndWSlRzZAzZATMAZDZD' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "message": "{\"text\":\"Hello World\"}",
+    "recipient": "{\"id\":\"\"}"
+  }'
+
+
+IGAAHam5A1ZAiFBZAE0zWld5b3RZAUVkxeVN1VW16S1c2UWhMaWsxMlFxal9LM1RSazJ4R1lHQmNFMmFVWHkwczhWZAF9yU1J5djlBdTl3T21rWk81T3RzN1R4MXhGcnVGTXIyYWxKUTl1Q2ZASSmMzTVZAsMGhnVnI2VndWSlRzZAzZATMAZDZD
