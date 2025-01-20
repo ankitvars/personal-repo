@@ -1,0 +1,5 @@
+curl -X GET \
+  'https://graph.instagram.com/v21.0/<IG_MEDIA_ID>?fields=id,media_type,media_url,owner,timestamp&access_token=IGAASEH1hSk5ZABZAE40WW44Sjc2d09pTnZABYzg3d21RUXBzNzFKMXBKcmFlMzAwMUNUdjlibUpEX0dIaW84RG9TT256enNuR3owOTUtdnpwUzBpV0VzZA245Vnlad2ZATNU5FTHZABcGRUa3dQNDVBaUlvY2MzakZAGWkRyc1VzWlJBSQZDZD'
+
+curl -X GET \
+  'https://graph.instagram.com/v21.0/me/media?fields=id,caption&access_token=IGAASEH1hSk5ZABZAE40WW44Sjc2d09pTnZABYzg3d21RUXBzNzFKMXBKcmFlMzAwMUNUdjlibUpEX0dIaW84RG9TT256enNuR3owOTUtdnpwUzBpV0VzZA245Vnlad2ZATNU5FTHZABcGRUa3dQNDVBaUlvY2MzakZAGWkRyc1VzWlJBSQZDZD'
