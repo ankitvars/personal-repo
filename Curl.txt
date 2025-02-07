@@ -1,0 +1,2 @@
+curl -i -X GET \
+ "https://graph.facebook.com/v22.0/484888764717290/posts?fields=id%2Ccreated_time%2Cmessage%2Cattachments%7Bmedia%7D&access_token=EAA1j7mZCSCtIBO3jkCZC4KUeGvySfA5pOyjI939yeQ1OeAZABMrdTXXCaJ0xdfoZAbbMZCbebjFPhymTRUBBzow7re9edUXMfecUQS0XtaBpmLfV01tcenLis2q5YR5HJ2zZCY3yANuGjNoVagBfGcN2sluuQ5KBTRFw4eXeWPlZBS7AKPEUYJXvDkGEp1MwJid"
