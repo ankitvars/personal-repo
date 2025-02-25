@@ -1,99 +1,167 @@
-This is the code of api- pages/api/social-timeline/index.tsx
-
+// pages/api/instagram-timeline/index.tsx
 import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'GET') {
-        return res.status(405).json({ success: false, message: "Method not allowed" });
-    }
+export async function fetchInstagramPosts() {
+  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const baseURL = process.env.INSTAGRAM_GRAPH_API_ENDPOINT;
+  const apiUrl = `${baseURL}/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${accessToken}`;
+  
+  const { data } = await axios.get(apiUrl);
+  // Optionally remove extra keys if not needed
+  delete data.id;
+  delete data.paging;
+  return data; // Expected to have a "data" field that is an array of posts
+}
 
-    try {
-        const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-        const baseURL = process.env.INSTAGRAM_GRAPH_API_ENDPOINT!;
-
-        const apiUrl = `${baseURL}/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${accessToken}`
-
-        // Create an Axios instance with SSL verification disabled
-        // const axiosInstance = axios.create({
-        //     baseURL: apiUrl,
-        //     headers: { 'Content-Type': 'application/json' },
-        //     validateStatus: function (status) {
-        //         return status >= 200 && status < 300;
-        //     },
-        //     transformRequest: [(data, headers) => {
-        //         headers['X-Custom-Header'] = 'foobar'; return data;
-        //     }],
-        //     proxy: false,
-        //     httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false })
-        // });
-
-        // Fetch media IDs and captions
-        const { data: mediaData } = await axios.get(apiUrl);
-        delete  mediaData?.id;
-        delete mediaData?.paging;
-
-        res.status(200).json({ success: true, data: mediaData });
-
-    } catch (error) {
-        console.error('Error fetching Instagram media:', error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-    }
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'GET') {
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' });
+  }
+  try {
+    const posts = await fetchInstagramPosts();
+    res.status(200).json({ success: true, data: posts });
+  } catch (error) {
+    console.error('Error fetching Instagram posts:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 }
 
 
-I am using in client component as 
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
 
-interface Post {
-  id: string;
-  caption: string;
-  media_type: string;
-  media_url: string;
-  permalink: string;
-  thumbnail_url?: string;
-  timestamp: string;
+
+
+// pages/api/facebook-timeline/index.tsx
+import axios from 'axios';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export async function fetchFacebookPosts() {
+  const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+  const baseURL = process.env.FACEBOOK_GRAPH_API_ENDPOINT;
+  const pageId = process.env.FACEBOOK_PAGE_ID; // Set this in your .env file
+  const apiUrl = `${baseURL}/v22.0/${pageId}/posts?fields=id,created_time,message,attachments{media}&access_token=${accessToken}`;
+  
+  const { data } = await axios.get(apiUrl);
+  return data; // Expected to have a "data" field that is an array of posts
 }
 
-interface SocialTimelineProps {
-  initialPosts: Post[];
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'GET') {
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' });
+  }
+  try {
+    const posts = await fetchFacebookPosts();
+    res.status(200).json({ success: true, data: posts });
+  } catch (error) {
+    console.error('Error fetching Facebook posts:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 }
 
-const SocialTimeline: React.FC<SocialTimelineProps> = ({ initialPosts }) => {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const heading = {
-    title: "Social",
-    span: "Timeline",
-    description:
-      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laboriosam modi error officiis odit culpa sed itaque vero praesentium.Laboriosam modi error officiis odit culpa sed itaque vero praesentium.",
-  };
-
-  const fetchInstagramData = async () => {
-    try {
-      const response = await fetch('/api/social-timeline');
-      const data = await response.json();
-      // Sort posts by timestamp in descending order 
-      const sortedPosts = data.data.data.sort((a: Post, b: Post) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); setPosts(sortedPosts);
-      setPosts(sortedPosts.slice(0, 3));
-    } catch (err) {
-      console.error('Error fetching Instagram data:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchInstagramData();
-  }, []);
-
---> Now i want to create a separate code for facebook api graph calling it using endpoint and token from .env 
-
-FACEBOOK_GRAPH_API_ENDPOINT="https://graph.facebook.com"
-FACEBOOK_ACCESS_TOKEN="EAA1j7mZCSCtIBO0aB6cCVD5PxIW3zly38CN5zklw0BI0MWyiYOFaApo9zaIyllNZBpoMEZC5ftC31ikZBRcJ6BZCjJzJxXb0VUx9dUwZClLhhpa7TKSkWuY8U48HuaMrulATCZCZCrRNvaxboaruR9n7pXOPo8VsZCZAdS8j0vATkhOkREoOZBGsAn0ZAOuZAciLuZCMk9"
 
 
 
-The api logic will call the posts from facebook page and return the data as i have implemented the similar logic in instagram now what you will do after you create a separate code for instagram in one other file tsx and then use both instagram and facebook page posts  in this main social-timeline-index.tsx file and return the 3 posts according to time latest one first then others also add one more logic of token refresh logic to extend token life via api call of insta and facebook both 
+// pages/api/social-timeline/index.tsx
+import type { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios';
+import { fetchInstagramPosts } from '../instagram-timeline';
+import { fetchFacebookPosts } from '../facebook-timeline';
 
-Facebook post curl for fetching post 
-curl -i -X GET \
- "https://graph.facebook.com/v22.0/484888764717290/posts?fields=id%2Ccreated_time%2Cmessage%2Cattachments%7Bmedia%7D&access_token=EAA1j7mZCSCtIBO3jkCZC4KUeGvySfA5pOyjI939yeQ1OeAZABMrdTXXCaJ0xdfoZAbbMZCbebjFPhymTRUBBzow7re9edUXMfecUQS0XtaBpmLfV01tcenLis2q5YR5HJ2zZCY3yANuGjNoVagBfGcN2sluuQ5KBTRFw4eXeWPlZBS7AKPEUYJXvDkGEp1MwJid"
+/** 
+ * Refresh Instagram long-lived token  
+ * Docs: https://developers.facebook.com/docs/instagram-basic-display-api/refresh-access-token
+ */
+const refreshInstagramToken = async () => {
+  try {
+    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+    const baseURL = process.env.INSTAGRAM_GRAPH_API_ENDPOINT;
+    const refreshUrl = `${baseURL}/refresh_access_token?grant_type=ig_refresh_token&access_token=${accessToken}`;
+    const response = await axios.get(refreshUrl);
+    console.log('Instagram token refreshed:', response.data);
+    // Optionally, update your stored token here if needed
+  } catch (error) {
+    console.error('Error refreshing Instagram token:', error);
+  }
+};
+
+/**
+ * Refresh Facebook token  
+ * Docs: https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing/
+ */
+const refreshFacebookToken = async () => {
+  try {
+    const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+    const appId = process.env.FACEBOOK_APP_ID; // Add to your .env
+    const appSecret = process.env.FACEBOOK_APP_SECRET; // Add to your .env
+    const baseURL = process.env.FACEBOOK_GRAPH_API_ENDPOINT;
+    const refreshUrl = `${baseURL}/v22.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${accessToken}`;
+    const response = await axios.get(refreshUrl);
+    console.log('Facebook token refreshed:', response.data);
+    // Optionally, update your stored token here if needed
+  } catch (error) {
+    console.error('Error refreshing Facebook token:', error);
+  }
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'GET') {
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' });
+  }
+  
+  try {
+    // Refresh both tokens in parallel
+    await Promise.all([refreshInstagramToken(), refreshFacebookToken()]);
+
+    // Fetch posts concurrently from both sources
+    const [instaData, fbData] = await Promise.all([
+      fetchInstagramPosts(),
+      fetchFacebookPosts()
+    ]);
+
+    // Instagram API typically returns an object like { data: [...] }
+    const instagramPosts = instaData.data || [];
+
+    // Facebook API returns an object with a "data" array of posts.
+    // Normalize the Facebook posts to match the Instagram post format.
+    const facebookRawPosts = fbData.data || [];
+    const facebookPosts = facebookRawPosts.map((post: any) => ({
+      id: post.id,
+      caption: post.message || '',
+      timestamp: post.created_time,
+      media_url: post.attachments?.data?.[0]?.media?.image?.src || '',
+      permalink: '', // You can construct a URL if needed
+      media_type: 'image' // Adjust if your page posts include other types
+    }));
+
+    // Merge both arrays
+    const combinedPosts = [...instagramPosts, ...facebookPosts];
+
+    // Sort posts by timestamp (newest first)
+    combinedPosts.sort(
+      (a: any, b: any) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    // Return the top 3 posts
+    const latestPosts = combinedPosts.slice(0, 3);
+    res.status(200).json({ success: true, data: latestPosts });
+  } catch (error) {
+    console.error('Error fetching social timeline:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
