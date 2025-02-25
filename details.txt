@@ -1,0 +1,8 @@
+484888764717290
+
+1188136286007598
+
+4ac7c6a2a5241115236e1069d29bf0d9
+
+curl -i -X GET \
+"https://graph.facebook.com/v22.0/me/posts?fields=created_time,message,attachments{subattachments{media_type,media},media_type,media}&access_token=YOUR_ACCESS_TOKEN"
