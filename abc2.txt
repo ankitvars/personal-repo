@@ -93,3 +93,7 @@ FACEBOOK_ACCESS_TOKEN="EAA1j7mZCSCtIBO0aB6cCVD5PxIW3zly38CN5zklw0BI0MWyiYOFaApo9
 
 
 The api logic will call the posts from facebook page and return the data as i have implemented the similar logic in instagram now what you will do after you create a separate code for instagram in one other file tsx and then use both instagram and facebook page posts  in this main social-timeline-index.tsx file and return the 3 posts according to time latest one first then others also add one more logic of token refresh logic to extend token life via api call of insta and facebook both 
+
+Facebook post curl for fetching post 
+curl -i -X GET \
+ "https://graph.facebook.com/v22.0/484888764717290/posts?fields=id%2Ccreated_time%2Cmessage%2Cattachments%7Bmedia%7D&access_token=EAA1j7mZCSCtIBO3jkCZC4KUeGvySfA5pOyjI939yeQ1OeAZABMrdTXXCaJ0xdfoZAbbMZCbebjFPhymTRUBBzow7re9edUXMfecUQS0XtaBpmLfV01tcenLis2q5YR5HJ2zZCY3yANuGjNoVagBfGcN2sluuQ5KBTRFw4eXeWPlZBS7AKPEUYJXvDkGEp1MwJid"
