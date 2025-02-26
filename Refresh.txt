@@ -68,3 +68,21 @@ export const refreshFacebookToken = async (): Promise<string> => {
   }
   return currentToken;
 };
+
+
+use yourDatabaseName;  // Switch to your database
+
+db.env.insertMany([
+  {
+    type: "instagram",
+    accessToken: "YOUR_INSTAGRAM_ACCESS_TOKEN",
+    expiryDate: new Date("2025-05-01T00:00:00Z"),  // Adjust the expiry date as needed
+    lastRefreshed: new Date()
+  },
+  {
+    type: "facebook",
+    accessToken: "YOUR_FACEBOOK_ACCESS_TOKEN",
+    expiryDate: new Date("2025-05-01T00:00:00Z"),
+    lastRefreshed: new Date()
+  }
+]);
