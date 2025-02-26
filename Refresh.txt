@@ -1,127 +1,70 @@
-Your task is to give me fix code
-
-// refreshTokensFromDB.ts
 import axios from 'axios';
 import { getAuthTokenDetails } from './token';
+import clientPromise from 'lib/mongodb';
+import { Databases } from '@components/Data/enums';
 
 const TEN_DAYS_IN_MS = 10 * 24 * 60 * 60 * 1000;
 
-export const refreshInstagramToken = async (): Promise<string> => {
-  // Fetch token record from DB for Instagram
-  const res = await getAuthTokenDetails('instagram');
-  const Token =res.accessToken;
-  const tokenRecord = await Token.findOne({ platform: 'instagram' });
-  if (!tokenRecord) {
-    throw new Error('No Instagram token stored in DB.');
-  }
+// Helper function to update token details in the DB
+async function updateAuthToken(
+  tokenType: 'instagram' | 'facebook',
+  newToken: string,
+  expiresIn: number
+) {
+  const client = await clientPromise;
+  const database = client.db(Databases.maxbupa);
+  const tokensCollection = database.collection('env');
+  const newExpiry = new Date(Date.now() + expiresIn * 1000);
+  await tokensCollection.updateOne(
+    { type: tokenType },
+    {
+      $set: {
+        accessToken: newToken,
+        expiryDate: newExpiry,
+        lastRefreshed: new Date(),
+      },
+    }
+  );
+}
 
-  const timeRemaining =  res.expiryDate;
+export const refreshInstagramToken = async (): Promise<string> => {
+  // Get the token details from the DB for Instagram
+  const tokenDetails = await getAuthTokenDetails('instagram');
+  const currentToken = tokenDetails.accessToken;
+  const expiryDate = new Date(tokenDetails.expiryDate);
+  const timeRemaining = expiryDate.getTime() - Date.now();
+
   if (timeRemaining < TEN_DAYS_IN_MS) {
     // Call Instagram refresh endpoint
-    const refreshUrl = `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${tokenRecord.accessToken}`;
+    const refreshUrl = `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${currentToken}`;
     const { data } = await axios.get(refreshUrl);
-    // Assuming the response includes "access_token" and "expires_in" (in seconds)
-    if (data.access_token && data.access_token !== tokenRecord.accessToken) {
-      tokenRecord.accessToken = data.access_token;
-      tokenRecord.expiresAt = new Date(Date.now() + data.expires_in * 1000);
-      tokenRecord.lastRefreshed = new Date();
-      await tokenRecord.save();
+    // If a new token is returned, update the DB
+    if (data.access_token && data.access_token !== currentToken) {
+      await updateAuthToken('instagram', data.access_token, data.expires_in);
+      return data.access_token;
     }
   }
-  return tokenRecord.accessToken;
+  return currentToken;
 };
 
 export const refreshFacebookToken = async (): Promise<string> => {
-  // Fetch token record from DB for Facebook
+  // Get the token details from the DB for Facebook
+  const tokenDetails = await getAuthTokenDetails('facebook');
+  const currentToken = tokenDetails.accessToken;
+  const expiryDate = new Date(tokenDetails.expiryDate);
+  const timeRemaining = expiryDate.getTime() - Date.now();
 
-  const res = await getAuthTokenDetails('facebook');
-  const Token =res.accessToken;
-  const tokenRecord = await Token.findOne({ platform: 'facebook' });
-  if (!tokenRecord) {
-    throw new Error('No Facebook token stored in DB.');
-  }
-
-  const timeRemaining = tokenRecord.expiresAt.getTime() - Date.now();
   if (timeRemaining < TEN_DAYS_IN_MS) {
-    // Use your app credentials stored in env variables
+    // Use your app credentials from env variables
     const appId = process.env.FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
-    const refreshUrl = `https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${tokenRecord.accessToken}`;
+    const refreshUrl = `https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${currentToken}`;
     const { data } = await axios.get(refreshUrl);
-    if (data.access_token && data.access_token !== tokenRecord.accessToken) {
-      tokenRecord.accessToken = data.access_token;
-      tokenRecord.expiresAt = new Date(Date.now() + data.expires_in * 1000);
-      tokenRecord.lastRefreshed = new Date();
-      await tokenRecord.save();
+    // If a new token is returned, update the DB
+    if (data.access_token && data.access_token !== currentToken) {
+      await updateAuthToken('facebook', data.access_token, data.expires_in);
+      return data.access_token;
     }
-
   }
-  return tokenRecord.accessToken;
+  return currentToken;
 };
-
-using this 
-import { Databases } from '@components/Data/enums';
-import clientPromise from 'lib/mongodb';
-
-export async function getAuthTokenDetails(tokenType: 'instagram' | 'facebook') {
-    try {
-        const client = await clientPromise;
-        const database = client.db(Databases.maxbupa); 
-        const tokensCollection = database.collection('env');
-        const query = { type: tokenType };
-        const tokenData = await tokensCollection.findOne(query);
-        
-        if (!tokenData) {
-            throw new Error(`Token for type ${tokenType} not found`);
-        }
-
-        return {
-            accessToken: tokenData.accessToken,
-            expiryDate: tokenData.expiryDate
-        };
-    } catch (error) {
-        throw new Error(`Error fetching token details: ${error.message}`);
-    }
-}
-
-
-and used in this 
-
-// pages/api/instagram-timeline/index.tsx
-import axios from 'axios';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { refreshInstagramToken } from '../social-timeline/refreshTokens';
-
-export async function fetchInstagramPosts() {
-  const accessToken = await refreshInstagramToken();
-  const baseURL = process.env.INSTAGRAM_GRAPH_API_ENDPOINT;
-
-   if (!accessToken || !baseURL) {
-      throw new Error('Instagram configuration missing.');
-    }
-    
-  const apiUrl = `${baseURL}/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${accessToken}`;
-  
-  const { data } = await axios.get(apiUrl);
-  delete data.id;
-  delete data.paging;
-  return data; 
-}
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'GET') {
-    return res
-      .status(405)
-      .json({ success: false, message: 'Method not allowed' });
-  }
-  try {
-    const posts = await fetchInstagramPosts();
-    res.status(200).json({ success: true, data: posts });
-  } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-}
