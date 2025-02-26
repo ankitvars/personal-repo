@@ -1,0 +1,54 @@
+// utils/fetchInstagramPosts.ts
+import axios from 'axios';
+import { refreshInstagramToken } from './refreshTokensFromDB';
+
+const fetchInstagramPosts = async () => {
+  try {
+    const accessToken = await refreshInstagramToken();
+    const baseURL = process.env.INSTAGRAM_GRAPH_API_ENDPOINT;
+    if (!accessToken || !baseURL) {
+      throw new Error('Instagram configuration missing.');
+    }
+    const apiUrl = `${baseURL}/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${accessToken}`;
+    const { data } = await axios.get(apiUrl);
+    return data?.data || [];
+  } catch (error) {
+    console.error('Error fetching Instagram posts:', error);
+    return [];
+  }
+};
+
+export default fetchInstagramPosts;
+
+
+
+// utils/fetchFacebookPosts.ts
+import axios from 'axios';
+import { refreshFacebookToken } from './refreshTokensFromDB';
+
+const fetchFacebookPosts = async () => {
+  try {
+    const accessToken = await refreshFacebookToken();
+    const baseURL = process.env.FACEBOOK_GRAPH_API_ENDPOINT;
+    if (!accessToken || !baseURL) {
+      throw new Error('Facebook configuration missing.');
+    }
+    const apiUrl = `${baseURL}/v22.0/me/posts?fields=id,created_time,message,attachments{media}&access_token=${accessToken}`;
+    const { data } = await axios.get(apiUrl);
+
+    return data?.data?.map(post => ({
+      id: post.id,
+      caption: post.message || '',
+      // Check if attachments exist and assign a media type
+      media_type: post.attachments?.data[0]?.media ? 'image' : 'text',
+      media_url: post.attachments?.data[0]?.media?.image?.src || '',
+      permalink: `https://facebook.com/${post.id}`,
+      timestamp: post.created_time,
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching Facebook posts:', error);
+    return [];
+  }
+};
+
+export default fetchFacebookPosts;
