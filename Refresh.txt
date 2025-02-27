@@ -4,6 +4,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { NavbarProp } from "@components/hooks/utils/types/propTypes";
 import PlanRecommendationSupport from "@components/atoms/PlanRecommendationSupport/PlanRecommendationSupport";
 import Link from "next/link";
+import { useEffect } from "react";
 const MenuItem = ({ heading, links, categoryLink }) => (
   <div className="px-4 w-full sm:w-1/2 lg:w-1/4 pb-6 pt-6 lg:pt-3">
     <a
@@ -74,6 +75,23 @@ const NavbarDesktop = ({
   headerPopover,
   PhoneJsx,
 }: NavbarProp) => {
+
+  useEffect(() => {
+    const notbotDiv = document.createElement('div');
+    notbotDiv.innerHTML = `
+     <div class="lemnisk-Notify" id="nbNotifications">
+        <a class="lemnisk-Notify-icon"></a>
+        <div id="nbNotifyDropdown" class="vz-drop-down-menu">
+            <div class="arrow"></div>
+            <div id="notificationContainer" class="vz-notification-container"></div>
+        </div>
+        <div id="vzAjax" style="display:block;"></div>
+    </div>
+    `;
+
+    document.body.appendChild(notbotDiv);
+  },[]);
+
   return (
     <Group h="100%" wrap="nowrap" className="relative overflow-hidden ml-3">
       <Burger
@@ -146,28 +164,7 @@ const NavbarDesktop = ({
 export default NavbarDesktop;
 
 
+I dont want to append it  but i want to show the notification bell icon of heroicon bell 
+in group - just before  <PlanRecommendationSupport PhoneJsx={PhoneJsx} />
 
-this is the header code and i want to add the lemnisk notification bot functionality 
-
-
-Dear Ankit
-
-Lemnisk team has shared the revised Script.  Please use the following.
-
-<!-- Lemnisk notbot code starts  -->
-    <div class="lemnisk-Notify" id="nbNotifications">
-        <a class="lemnisk-Notify-icon"></a>
-        <div id="nbNotifyDropdown" class="vz-drop-down-menu">
-            <div class="arrow"></div>
-            <div id="notificationContainer" class="vz-notification-container"></div>
-        </div>
-        <div id="vzAjax" style="display:block;"></div>
-    </div>
-<!-- Lemnisk notbot code ends  -->
-
- 
-
- 
-
-
-how do i add it in my next app 
+this how to do it only give me steps and code to update it 
