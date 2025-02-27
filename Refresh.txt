@@ -1,1 +1,173 @@
-https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=586669231013339&client_secret=919eb151718b2542804db68f56d52340&fb_exchange_token=EAAIVkpMdfdsBOZBXozpZCTXlNPKAnpZBAJXV1XPx5cx5XRvDbVlRTdZByNGA1ZCopga0dgZAukSITfDdzdXSKACQLy2QUqVHw7FvZBeJZAkGiCzn9xsjmCLNZA28pYDF82VxjKT3sJKZBQvRQ79ARIzgcgTz19IAD5tJCni0cni5ThQDhDxJK1Gioxu0C81PhC5OVvvjVkevIqpW6MBOQXYUwXDAUZD
+import Image from "next/image";
+import { Burger, Group, Menu, UnstyledButton } from "@mantine/core";
+import { MdKeyboardArrowDown } from "react-icons/md";
+import { NavbarProp } from "@components/hooks/utils/types/propTypes";
+import PlanRecommendationSupport from "@components/atoms/PlanRecommendationSupport/PlanRecommendationSupport";
+import Link from "next/link";
+const MenuItem = ({ heading, links, categoryLink }) => (
+  <div className="px-4 w-full sm:w-1/2 lg:w-1/4 pb-6 pt-6 lg:pt-3">
+    <a
+      className="font-bold text-md text-black text-bold mb-2"
+      href={categoryLink}
+    >
+      {heading}
+    </a>
+    <ul>
+      {links.map(({ text, link }, index) => (
+        <li key={index}>
+          <a
+            href={link}
+            className="block p-3 hover:bg-amber-100 text-gray-700 text-xs rounded-md"
+          >
+            {text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const MegaMenuContent = ({
+  mainHeading,
+  // mainDescription,
+  picPath,
+  iconPath,
+  menusArray,
+}) => (
+  <div
+    role="toggle"
+    className="p-6 mega-menu mb-16 w-[90vw] sm:mb-0 shadow-xl bg-white relative"
+  >
+    <div className="mx-auto w-full flex justify-between">
+      {/* Customize or add more menu items as needed */}
+      <div className="px-4 flex flex-col justify-center w-full sm:w-1/2 lg:w-1/4 pb-6 pt-6 lg:pt-3">
+        <Image src={iconPath} height={50} width={50} alt="icon" />
+
+        <h3 className="font-bold text-2xl text-black text-bold mb-2">
+          {mainHeading}
+        </h3>
+        {/* <p className="text-sm text-gray-700 mb-2">{mainDescription}</p> */}
+      </div>
+      {menusArray?.map((menu, index: number) => {
+        return (
+          <MenuItem
+            key={index}
+            heading={menu.category}
+            categoryLink={menu.categoryLink}
+            links={menu.subCategories}
+          />
+        );
+      })}
+
+      <ul className="px-4 w-full flex items-center sm:w-1/2  lg:w-1/4 pb-6 pt-6 lg:pt-3">
+        <Image src={picPath} height={200} width={200} alt="Photo" />
+      </ul>
+      {/* Add more menu items as needed */}
+    </div>
+  </div>
+);
+
+const NavbarDesktop = ({
+  opened,
+  toggle,
+  headerList,
+  headerPopover,
+  PhoneJsx,
+}: NavbarProp) => {
+  return (
+    <Group h="100%" wrap="nowrap" className="relative overflow-hidden ml-3">
+      <Burger
+        opened={opened}
+        onClick={toggle}
+        hiddenFrom="sm"
+        size="sm"
+        color={opened ? "white" : "black"}
+      />
+      <Group justify="space-between" wrap="nowrap" style={{ flex: 1 }} gap="xs">
+        <Group
+          justify="space-between"
+          wrap="nowrap"
+          className="mx-auto md:mx-0"
+        >
+          <Link prefetch={false} href="/">
+            <Image
+              src="/home-page-images/logo-bar-images/Niva-Bupa-Logo.svg"
+              width={85}
+              height={57}
+              alt="Best Health Insurance Company in India"
+            />
+          </Link>
+          <Group ml="xs" gap={40} visibleFrom="sm" wrap="nowrap">
+            {(headerList ?? []).map(({ name, iconPath, chevronFlag, link }) => {
+              return (
+                <Menu
+                  trigger="hover"
+                  openDelay={100}
+                  // closeDelay={400}
+                  key={name}
+                  shadow="md"
+                >
+                  <Menu.Target>
+                    <UnstyledButton
+                      display="flex"
+                      className="items-center gap-1"
+                      onClick={() => {
+                        if (link) {
+                          window.open(link, "_blank");
+                        }
+                      }}
+                    >
+                      <span className="text-sm">{name}</span>{" "}
+                      {chevronFlag && <MdKeyboardArrowDown />}
+                    </UnstyledButton>
+                  </Menu.Target>
+                  {chevronFlag && (
+                    <Menu.Dropdown>
+                      <MegaMenuContent
+                        mainHeading={name}
+                        // mainDescription="When rendering several related Popovers, for example in a sites header navigation, use the Popover.Group com."
+                        picPath="/ethinos-home-page/images/familyPhoto.jpg"
+                        iconPath={iconPath}
+                        menusArray={headerPopover[name]}
+                      />
+                    </Menu.Dropdown>
+                  )}
+                </Menu>
+              );
+            })}
+          </Group>
+        </Group>
+        <PlanRecommendationSupport PhoneJsx={PhoneJsx} />
+      </Group>
+    </Group>
+  );
+};
+
+export default NavbarDesktop;
+
+
+
+this is the header code and i want to add the lemnisk notification bot functionality 
+
+
+Dear Ankit
+
+Lemnisk team has shared the revised Script.  Please use the following.
+
+<!-- Lemnisk notbot code starts  -->
+    <div class="lemnisk-Notify" id="nbNotifications">
+        <a class="lemnisk-Notify-icon"></a>
+        <div id="nbNotifyDropdown" class="vz-drop-down-menu">
+            <div class="arrow"></div>
+            <div id="notificationContainer" class="vz-notification-container"></div>
+        </div>
+        <div id="vzAjax" style="display:block;"></div>
+    </div>
+<!-- Lemnisk notbot code ends  -->
+
+ 
+
+ 
+
+
+how do i add it in my next app 
